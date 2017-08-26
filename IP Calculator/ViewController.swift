@@ -10,24 +10,28 @@ import UIKit
 
 class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
 
+    //Подключение пикера
     @IBOutlet weak var IPPickerSelect: UIPickerView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //Инициализация пикера
         IPPickerSelect.delegate = self
         IPPickerSelect.dataSource = self
     }
     
-    //Общее количество компонентов
+    //Общее количество компонентов в пикере (столбцов)
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 5
     }
 
+    //Количество компонентов в столбцах пикера
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return 255
     }
     
+//Наброски для заполнения пикера значениями
 //    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
 //       
 //    }
