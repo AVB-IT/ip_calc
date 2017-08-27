@@ -5,6 +5,11 @@
 //  Created by Алексей Бубнов on 27.08.17.
 //  Copyright © 2017 AVB-IT. All rights reserved.
 //
+// usage: var x = IpAddr(ipAddress ipaddr: String, subnetMask mask: Int)
+//          x.subnet
+//          x.max
+//          x.min
+//          x.addr
 
 import Foundation
 
@@ -18,36 +23,39 @@ struct IpAddr {
         subnet = ""
         min = ""
         max = ""
-        var addrOct = [UInt8]()
-        var maskOct = [UInt8]()
-        var subnetOct = [UInt8]()
-        var minOct = [UInt8]()
-        var maxOct = [UInt8]()
+        var addrOct = Array(repeating: 0, count: 4)
+        var maskOct = Array(repeating: 0, count: 4)
+        var subnetOct = Array(repeating: 0, count: 4)
+        var minOct = Array(repeating: 0, count: 4)
+        var maxOct = Array(repeating: 0, count: 4)
         
         var bitCount = mask
         for i in 0...3 {
-            addrOct[i] = UInt8(ipaddr.components(separatedBy: ".")[i])!
+            addrOct[i] = Int(ipaddr.components(separatedBy: ".")[i])!
+            //print(addrOct[i])
             if bitCount >= 8 {
                 maskOct[i] = 255
+                //print(maskOct[i])
                 subnetOct[i] = addrOct[i]
                 minOct[i] = addrOct[i]
                 maxOct[i] = addrOct[i]
+                //print(subnetOct[i])
             }
             else {
-                maskOct[i] = UInt8(pow(Double(2), Double(bitCount)))
-                if maskOct[i] == 1 {maskOct[i] = 0}
-                subnetOct[i] = (addrOct[i] / maskOct[i]) * maskOct[i]
-                if subnetOct[i] == 0 {
-                    minOct[i] = 0
-                }
-                else {
-                    minOct[i] = subnetOct[i] + 1
-                }
-                maxOct[i] = 255
+                if bitCount <= 0 {maskOct[i] = 0}
+                else {maskOct[i] = 256 - Int(pow(Double(2), Double(8 - bitCount)))}
+                subnetOct[i] = (addrOct[i] / (256 - maskOct[i])) * (256 - maskOct[i])
+                //print(subnetOct[i])
+                if i != 3 {minOct[i] = subnetOct[i]}
+                else {minOct[i] = subnetOct[i] + 1}
+                if maskOct[i] == 0 {maxOct[i] = 254}
+                else {maxOct[i] = subnetOct[i] + 256 - maskOct[i]}
+                
             }
             bitCount -= 8
-            if i == 3 {subnet = String(subnetOct[i]); max = String(maxOct[i]); min = String(minOct[i])}
-            else {subnet = String(subnetOct[i]) + "."; max = String(maxOct[i]) + "."; min = String(minOct[i])}
+            //print(bitCount)
+            if i == 3 {subnet += String(subnetOct[i]); max += String(maxOct[i]); min += String(minOct[i])}
+            else {subnet += String(subnetOct[i]) + "."; max += String(maxOct[i]) + "."; min += String(minOct[i]) + "."}
         }
         
     }
