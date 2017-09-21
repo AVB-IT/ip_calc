@@ -8,7 +8,20 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+// реализация кастомного делегата
+// дополнительно наследует NSObject для соответсвия UITextFieldDelegate
+
+class TextFieldDelegate: NSObject, UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.text = "hui"
+    }
+}
+
+class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate {
+    @IBOutlet weak var textField1: UITextField!
+    @IBOutlet weak var textField2: UITextField!
+    @IBOutlet weak var textField3: UITextField!
+    let txtDlg = TextFieldDelegate() // экземпляр кастомного делегата
 
     //Подключение пикера
     @IBOutlet weak var IPPickerSelect: UIPickerView!
@@ -16,7 +29,12 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //Инициализация пикера
+        //Инициализация поведения текстовых поля
+        textField1.delegate = txtDlg // кастомный делегат
+        textField2.delegate = self // дефолтный делегат
+        textField3.delegate = self // дефолтный делегат
+        
+        //Инициализация пикераßx
         IPPickerSelect.delegate = self
         IPPickerSelect.dataSource = self
     }
@@ -29,6 +47,10 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     //Количество компонентов в столбцах пикера
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return 255
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.text = "pizda"
     }
     
 //Наброски для заполнения пикера значениями
