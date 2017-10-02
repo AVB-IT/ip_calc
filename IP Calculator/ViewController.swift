@@ -8,12 +8,43 @@
 
 import UIKit
 
+
+
 // реализация кастомного делегата
 // дополнительно наследует NSObject для соответсвия UITextFieldDelegate
 
-class TextFieldDelegate: NSObject, UITextFieldDelegate {
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        textField.text = "hui"
+class TextFieldDelegateIpAddr: NSObject, UITextFieldDelegate {
+    // допустимые символы для ввода
+    private let avalible_chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "."]
+    // проверка соответствия формату IPv4
+    private func mayBeIpAddr (string: String) -> Bool {
+        var txt = string.components(separatedBy: ".")
+        if txt.count > 4 {
+            return false
+        }
+        if txt.popLast() == "" && !txt.contains("") {
+            return true
+        }
+        for i in string.components(separatedBy: ".") {
+            if let oct = Int(i) {
+                if oct >= 256 {
+                    return false
+                }
+            }
+            else {
+                return false
+            }
+        }
+        return true
+    }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if avalible_chars.contains(string) && mayBeIpAddr(string: textField.text! + string) {
+            return true
+        }
+        else {
+            return false
+        }
     }
 }
 
@@ -21,14 +52,13 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     @IBOutlet weak var textField1: UITextField!
     @IBOutlet weak var textField2: UITextField!
     @IBOutlet weak var textField3: UITextField!
-    let txtDlg = TextFieldDelegate() // экземпляр кастомного делегата
+    let txtDlg = TextFieldDelegateIpAddr() // экземпляр кастомного делегата
 
     //Подключение пикера
     @IBOutlet weak var IPPickerSelect: UIPickerView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         //Инициализация поведения текстовых поля
         textField1.delegate = txtDlg // кастомный делегат
         textField2.delegate = self // дефолтный делегат
@@ -49,6 +79,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         return 255
     }
     
+    // лоховичковский способ делегирования (дефолтный делегат)
     func textFieldDidEndEditing(_ textField: UITextField) {
         textField.text = "pizda"
     }
