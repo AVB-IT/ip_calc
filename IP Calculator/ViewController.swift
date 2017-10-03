@@ -15,9 +15,9 @@ import UIKit
 
 class TextFieldDelegateIpAddr: NSObject, UITextFieldDelegate {
     // допустимые символы для ввода
-    private let avalible_chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "."]
+    let avalible_chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "."]
     // проверка соответствия формату IPv4
-    private func mayBeIpAddr (string: String) -> Bool {
+    func mayBeIpAddr (string: String) -> Bool {
         var txt = string.components(separatedBy: ".")
         if txt.count > 4 {
             return false
@@ -48,11 +48,33 @@ class TextFieldDelegateIpAddr: NSObject, UITextFieldDelegate {
     }
 }
 
+class TextFieldDelegateMask: TextFieldDelegateIpAddr {
+    
+    let avalible_mask_oct = ["0", "2", "4", "16", "32", "64", "128", "255"]
+    override func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if string == "." {
+            for i in (textField.text! + string).components(separatedBy: ".").dropLast() {
+                if !avalible_mask_oct.contains(i) {
+                    return false
+                }
+            }
+        }
+        if avalible_chars.contains(string) && mayBeIpAddr(string: textField.text! + string) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+    
+}
+
 class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate {
     @IBOutlet weak var textField1: UITextField!
     @IBOutlet weak var textField2: UITextField!
     @IBOutlet weak var textField3: UITextField!
     let txtDlg = TextFieldDelegateIpAddr() // экземпляр кастомного делегата
+    let maskDlg = TextFieldDelegateMask() // экземпляр кастомного делегата
 
     //Подключение пикера
     @IBOutlet weak var IPPickerSelect: UIPickerView!
@@ -61,7 +83,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         super.viewDidLoad()
         //Инициализация поведения текстовых поля
         textField1.delegate = txtDlg // кастомный делегат
-        textField2.delegate = self // дефолтный делегат
+        textField2.delegate = maskDlg // дефолтный делегат
         textField3.delegate = self // дефолтный делегат
         
         //Инициализация пикераßx
