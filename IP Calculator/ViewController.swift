@@ -14,9 +14,6 @@ import UIKit
 // дополнительно наследует NSObject для соответсвия UITextFieldDelegate
 
 class TextFieldDelegateIpAddr: NSObject, UITextFieldDelegate {
-    // допустимые символы для ввода
-    let avalible_chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "."]
-    // проверка соответствия формату IPv4
     func mayBeIpAddr (string: String) -> Bool {
         var txt = string.components(separatedBy: ".")
         if txt.count > 4 {
@@ -39,7 +36,7 @@ class TextFieldDelegateIpAddr: NSObject, UITextFieldDelegate {
     }
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if avalible_chars.contains(string) && mayBeIpAddr(string: textField.text! + string) {
+        if mayBeIpAddr(string: textField.text! + string) {
             return true
         }
         else {
@@ -52,22 +49,34 @@ class TextFieldDelegateMask: TextFieldDelegateIpAddr {
     
     let avalible_mask_oct = ["0", "2", "4", "16", "32", "64", "128", "255"]
     override func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if string == "." {
-            for i in (textField.text! + string).components(separatedBy: ".").dropLast() {
-                if !avalible_mask_oct.contains(i) {
-                    return false
-                }
-            }
-        }
-        if avalible_chars.contains(string) && mayBeIpAddr(string: textField.text! + string) {
-            return true
-        }
-        else {
+        if !mayBeIpAddr(string: textField.text! + string) {
             return false
         }
+        
+        
+        if string == "." {
+            var predicate = false
+            for i in (textField.text! + string).components(separatedBy: ".") {
+                if i == "" {
+                    return true
+                }
+                if predicate && i != "0" {
+                    return false
+                }
+                if avalible_mask_oct.contains(i) {
+                    if Int(i)! != 255 {
+                        predicate = true
+                    }
+                }
+                else { return false }
+            }
+        }
+        
+        return true
     }
-    
 }
+
+
 
 class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate {
     @IBOutlet weak var textField1: UITextField!
@@ -102,8 +111,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     }
     
     // лоховичковский способ делегирования (дефолтный делегат)
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        textField.text = "pizda"
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if let i = UInt8(textField.text! + string) {
+            if i <= 32 {return true}
+        }
+        return false
     }
     
 //Наброски для заполнения пикера значениями
